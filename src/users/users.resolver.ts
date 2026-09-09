@@ -1,10 +1,15 @@
-import {  Args,  Int,  Mutation,  Query,  Resolver,} from '@nestjs/graphql';
+import {  Args,  Int,  Mutation,  Query,  Resolver, Parent,  ResolveField,Context, } 
+from '@nestjs/graphql';
+
+import DataLoader from 'dataloader';
 
 import { User } from './user.entity';
 import { UsersService } from './users.service';
 
 import {  CreateUserInput,} from './dto/create-user.input';
 import {  UpdateUserInput,} from './dto/update-user.input';
+import { Post } from '../posts/entities/post.entity';
+
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -15,9 +20,7 @@ export class UsersResolver {
 
   @Query(() => [User])
   users() {
-
     return this.usersService.findAll();
-
   }
 
   @Query(() => User)
@@ -27,9 +30,7 @@ export class UsersResolver {
     })
     id: number,
   ) {
-
     return this.usersService.findOne(id);
-
   }
 
   @Mutation(() => User)
@@ -49,9 +50,6 @@ updateUser(
   @Args('updateUserInput')
   updateUserInput: UpdateUserInput,
 ) {
-
-     console.log ("--------------RAZZ------updateUserresolver------", updateUserInput) ;
-
   return this.usersService.update(
     updateUserInput,
   );
@@ -66,13 +64,27 @@ deleteUser(
   })
   id: number,
 ) {
-
   return this.usersService.remove(id);
+}
 
+
+
+@ResolveField(() => [Post])
+posts(
+  @Parent() user: User,
+
+  @Context()
+  context: {
+    userPostsLoader:
+      DataLoader<number, Post[]>;
+  },
+) {
+
+  return context.userPostsLoader.load(
+    user.id,
+  );
 }
 
 
 }
-
-
 

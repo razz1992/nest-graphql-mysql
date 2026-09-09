@@ -20,11 +20,16 @@ export class User {
   })
   email: string;
 
+  @Field(() => [Post])
   @OneToMany(
     () => Post,
     (post) => post.user,
   )
   posts: Post[];
+
+
+
+  
 }
 
 

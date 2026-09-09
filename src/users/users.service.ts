@@ -6,11 +6,17 @@ import { User } from './user.entity';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 
+import { Post } from '../posts/entities/post.entity';
+
+
 @Injectable()
 export class UsersService {
      constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    @InjectRepository(Post)
+  private readonly postRepository:    Repository<Post>,
   ) {}
 
    findAll(): Promise<User[]> {

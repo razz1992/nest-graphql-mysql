@@ -3,11 +3,20 @@ import { GraphQLModule } from '@nestjs/graphql';
 import {  ApolloDriver,  ApolloDriverConfig,} from '@nestjs/apollo';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import {  LoadersFactory,} from './loaders/loaders.factory';
+
 import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
+import { LoadersModule } from './loaders/loaders.module';
+
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '.env.local' });
+
+console.log('APPKEY=', process.env.OBSERVABILITY_APPKEY);
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -16,25 +25,42 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     // Distributed tracing, auto-correlated logs, request/job metrics, error
     // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
     ObserveModule.forRoot({
-      appKey: 'YOUR_APP_KEY',
-      appSecret: 'YOUR_APP_SECRET',
-      serviceId: 'nest-graphql-mysql',
+      appKey :  process.env.OBSERVABILITY_APPKEY! ,
+      appSecret: process.env.OBSERVABILITY_APPSECRET!,
+      serviceId: process.env.OBSERVABILITY_SERVICEID!,
     }),
+    
+    
 
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRootAsync<
+      ApolloDriverConfig
+    >({
       driver: ApolloDriver,
-      // Generate schema automatically
-      autoSchemaFile: true,
-      // GraphQL browser IDE
-      graphiql: true,
+      imports: [
+        LoadersModule,
+      ],
+      inject: [
+        LoadersFactory,
+      ],
+      useFactory: (
+        loadersFactory: LoadersFactory,
+      ) => ({
+        autoSchemaFile: true,
+        graphiql: true,
+        context: () => ({
+          userPostsLoader:
+            loadersFactory
+              .createUserPostsLoader(),
+        }),
+      }),
     }),
 
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: '127.0.0.1',
+      host:  process.env.MYSQL_DB_HOST!,
       port: 3306,
-      username: 'root',
-      password: 'root',
+      username:  process.env.MYSQL_DB_USER!,
+      password: process.env.MYSQL_DB_PASSWORD!,
       database: 'graphql_demo',
       autoLoadEntities: true,
       synchronize: true,
@@ -44,10 +70,11 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
     PostsModule,
 
+    LoadersModule,
+
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
-
 
