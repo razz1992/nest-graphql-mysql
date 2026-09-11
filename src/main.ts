@@ -1,7 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import {  ValidationPipe, } from '@nestjs/common';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.prod' });
 
-import { AppModule, ObserveInstrument } from './app.module';
+import { AppModule, 
+//  ObserveInstrument 
+} from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -13,7 +17,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen((process.env.PORT! ) ?? 3000);
 }
 bootstrap();
 

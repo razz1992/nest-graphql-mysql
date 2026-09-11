@@ -5,4 +5,11 @@ export class AppService {
   getHello(): string {
     return 'Hello World!';
   }
+
+  getHealth(): object {
+    return {
+      status: 'ok',
+    };
+  }
+
 }
