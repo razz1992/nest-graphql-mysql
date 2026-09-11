@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "===== Installing Nest CLI for build ====="
+
+npm install --no-save @nestjs/cli
+
 echo "===== Starting NestJS build ====="
 
 npm run build
