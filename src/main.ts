@@ -1,26 +1,48 @@
- import * as fs from 'fs';
+import { readFileSync } from 'node:fs';
 
- import { NestFactory } from '@nestjs/core';
-import {  ValidationPipe, } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.local' });
+dotenv.config({
+  path: process.env.NODE_ENV === 'production' ? '.env.prod' : '.env.local',
+});
 
-import { AppModule, 
-//  ObserveInstrument 
+import {
+  AppModule,
+  //  ObserveInstrument
 } from './app.module';
 
-async function bootstrap() {
-  const httpsOptions = {
-    key: fs.readFileSync('./certs/key.pem'),
-    cert: fs.readFileSync('./certs/cert.pem'),
-    passphrase: 'rajua',
+function getHttpsOptions() {
+  const keyPath = process.env.SSL_KEY_PATH;
+  const certPath = process.env.SSL_CERT_PATH;
+
+  if (!keyPath && !certPath) {
+    return undefined;
+  }
+
+  if (!keyPath || !certPath) {
+    throw new Error('Both SSL_KEY_PATH and SSL_CERT_PATH must be set to enable HTTPS.');
+  }
+
+  return {
+    key: readFileSync(keyPath),
+    cert: readFileSync(certPath),
+    passphrase: process.env.SSL_PASSPHRASE,
   };
-  
-  const app = await NestFactory.create(AppModule, {
-    httpsOptions,
-  })//,{
-    // instrument: ObserveInstrument,
+}
+
+async function bootstrap() {
+  const httpsOptions = getHttpsOptions();
+  const app = await NestFactory.create(
+    AppModule,
+    httpsOptions
+      ? {
+          httpsOptions,
+        }
+      : {},
+  ); //,{
+  // instrument: ObserveInstrument,
   // });
   app.useGlobalPipes(
     new ValidationPipe({
@@ -28,9 +50,6 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  await app.listen((process.env.PORT! ) ?? 3000);
+  await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
-
-
-

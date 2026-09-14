@@ -43,6 +43,13 @@ lerna-debug.log*
 .env.local
 .env.prod
 
+# TLS/SSL private material
+/certs/*
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
 
 # temp directory
 .temp
