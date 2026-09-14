@@ -13,7 +13,7 @@ import { PostsModule } from './posts/posts.module';
 import { LoadersModule } from './loaders/loaders.module';
 
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.prod' });
+dotenv.config({ path: '.env.local' });
 
 // export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -27,7 +27,7 @@ dotenv.config({ path: '.env.prod' });
     //   serviceId: process.env.OBSERVABILITY_SERVICEID!,
     // }),
     
-/*    
+
 
     GraphQLModule.forRootAsync<ApolloDriverConfig>
     ({
@@ -67,7 +67,7 @@ dotenv.config({ path: '.env.prod' });
     PostsModule,
 
     LoadersModule,
-*/
+
   ],
   controllers: [AppController],
   providers: [AppService],
