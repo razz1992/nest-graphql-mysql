@@ -1,0 +1,30 @@
+node_modules
+dist
+build
+coverage
+.git
+.gitignore
+*.log
+npm-debug.log*
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# editor/OS
+.vscode
+.idea
+.DS_Store
+
+# tests
+test
+*.spec.ts
+
+# deployment / CI artifacts not needed inside the image
+.elasticbeanstalk
+.platform
+Jenkinsfile
+Procfile
+*.zip
+README.md
