@@ -31,12 +31,10 @@ RUN npm prune --omit=dev
 FROM node:22-alpine AS production
 WORKDIR /app
 
-# NOTE on config: main.ts loads .env.prod via dotenv when NODE_ENV=production,
-# and app.module.ts also loads .env.local unconditionally right after. Neither
-# file is baked into this image (see .dockerignore), which is intentional:
-# dotenv.config() never overwrites a variable that's already set, so real env
-# vars you inject below (-e / --env-file / compose `environment:`) always win.
-# Don't rely on a committed .env file reaching the container.
+# Runtime configuration is loaded once from env-specific local files or injected
+# process variables. Local development can use .env.local; Docker/EC2 should
+# inject real values with --env-file, compose environment, SSM, or a secrets
+# manager. Env files are not baked into this image.
 ENV NODE_ENV=production
 ENV PORT=8085
 
