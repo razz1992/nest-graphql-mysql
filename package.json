@@ -13,6 +13,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "seed:excel": "node scripts/bulk-insert-from-excel.js",
     "lint": "oxlint src/ test/",
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
@@ -39,7 +40,8 @@
     "mysql2": "^3.24.4",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "typeorm": "^1.1.1"
+    "typeorm": "^1.1.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@nestjs/cli": "^12.0.0",

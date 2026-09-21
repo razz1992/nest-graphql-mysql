@@ -31,3 +31,16 @@ docker run -d \
   -e MYSQL_DB_PASSWORD=your-password \
   -e MYSQL_DB_NAME=graphql_demo \
   nest-graphql-mysql
+
+
+  -------Seed data---------------
+  It uses your same env convention: local reads .env.local, production reads .env.prod
+To add seed data into the database - scripts/bulk-insert-from-excel.js
+  npm run seed:excel
+
+  npm run seed:excel -- --file ./test-data/graphql-seed.xlsx
+
+>> To clear existing users/posts first:
+npm run seed:excel -- --file ./test-data/graphql-seed.xlsx --truncate
+
+
