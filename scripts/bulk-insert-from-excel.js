@@ -294,7 +294,7 @@ async function main() {
       await truncateData(connection);
     }
 
-    // await upsertUsers(connection, users, chunkSize);
+    await upsertUsers(connection, users, chunkSize);
 
     const userIdByEmail = await getUserIdByEmail(connection);
     const existingUserIds = await getExistingUserIds(connection);
