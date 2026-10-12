@@ -28,3 +28,10 @@ Jenkinsfile
 Procfile
 *.zip
 README.md
+
+# Terraform, runtime certificates and secrets must not enter the Docker build context
+/infra
+/certs
+/secrets
+*.tfstate
+*.tfstate.*

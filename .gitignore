@@ -64,10 +64,22 @@ pids
 *.seed
 *.pid.lock
 
-# Diagnostic reports (https://nodejs.org/api/report.html)
+# Diagnostic reports (https://nodejs.org/en/docs/guides/diagnostics)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# Terraform working files and state (never commit state or real variables)
+/infra/.terraform/
+/infra/terraform.tfstate
+/infra/terraform.tfstate.*
+/infra/terraform.tfvars
+/infra/terraform.tfvars.json
+/infra/*.tfplan
+/infra/crash.log
+
+# Runtime database secrets
+/secrets/*
