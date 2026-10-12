@@ -1,5 +1,15 @@
+import { readFileSync } from 'node:fs';
+
 function getDefaultPort(): number {
   return process.env.NODE_ENV === 'production' ? 8085 : 3000;
+}
+
+function getDatabasePassword(): string | undefined {
+  const passwordFile = process.env.MYSQL_DB_PASSWORD_FILE;
+  if (passwordFile) {
+    return readFileSync(passwordFile, 'utf8').replace(/\r?\n$/, '');
+  }
+  return process.env.MYSQL_DB_PASSWORD;
 }
 
 export default () => ({
@@ -12,8 +22,9 @@ export default () => ({
     host: process.env.MYSQL_DB_HOST,
     port: Number(process.env.MYSQL_DB_PORT ?? 3306),
     username: process.env.MYSQL_DB_USER,
-    password: process.env.MYSQL_DB_PASSWORD,
+    password: getDatabasePassword(),
     name: process.env.MYSQL_DB_NAME ?? 'graphql_demo',
+    sslCaPath: process.env.MYSQL_SSL_CA_PATH,
   },
   ssl: {
     keyPath: process.env.SSL_KEY_PATH,

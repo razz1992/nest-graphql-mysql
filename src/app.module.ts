@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -5,10 +6,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { LoadersFactory } from './loaders/loaders.factory';
-
-// testing jenkins 2
-
-//  import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -20,8 +17,6 @@ import { loadEnvironmentVariables } from './config/load-environment';
 
 loadEnvironmentVariables();
 
-// export const { ObserveModule, ObserveInstrument } = createObserveModule();
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -30,15 +25,6 @@ loadEnvironmentVariables();
       load: [configuration],
       validate: validateEnvironment,
     }),
-
-    // Distributed tracing, auto-correlated logs, request/job metrics, error
-    // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
-    // ObserveModule.forRoot({
-    //   appKey :  process.env.OBSERVABILITY_APPKEY! ,
-    //   appSecret: process.env.OBSERVABILITY_APPSECRET!,
-    //   serviceId: process.env.OBSERVABILITY_SERVICEID!,
-    // }),
-
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       imports: [LoadersModule],
@@ -52,25 +38,27 @@ loadEnvironmentVariables();
         }),
       }),
     }),
-
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.getOrThrow<string>('database.host'),
-        port: configService.getOrThrow<number>('database.port'),
-        username: configService.getOrThrow<string>('database.username'),
-        password: configService.getOrThrow<string>('database.password'),
-        database: configService.getOrThrow<string>('database.name'),
-        autoLoadEntities: true,
-        synchronize: true,
-      }),
+      useFactory: (configService: ConfigService) => {
+        const mysqlSslCaPath = configService.get<string>('database.sslCaPath');
+        return {
+          type: 'mysql' as const,
+          host: configService.getOrThrow<string>('database.host'),
+          port: configService.getOrThrow<number>('database.port'),
+          username: configService.getOrThrow<string>('database.username'),
+          password: configService.getOrThrow<string>('database.password'),
+          database: configService.getOrThrow<string>('database.name'),
+          ssl: mysqlSslCaPath
+            ? { ca: readFileSync(mysqlSslCaPath), rejectUnauthorized: true }
+            : undefined,
+          autoLoadEntities: true,
+          synchronize: true,
+        };
+      },
     }),
-
     UsersModule,
-
     PostsModule,
-
     LoadersModule,
   ],
   controllers: [AppController],

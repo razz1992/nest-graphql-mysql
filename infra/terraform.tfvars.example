@@ -1,0 +1,14 @@
+# Replace with your current public IPv4 address /32 before using.
+allowed_cidr = "203.0.113.10/32"
+
+# Pin to a full Git commit SHA for repeatable deployments.
+repository_ref = "main"
+aws_region     = "us-east-1"
+
+mysql_db_host = "mysql-26d126af-kumarrajneesh75-9c63.l.aivencloud.com"
+mysql_db_port = 21599
+mysql_db_user = "avnadmin"
+mysql_db_name = "defaultdb"
+
+# Pre-create SecureString mysql-password and String mysql-ca-pem parameters in SSM.
+ssm_parameter_prefix = "/nest-graphql-mysql/test"

@@ -1,46 +1,46 @@
+# nest-graphql-mysql
 
-NODE_ENV=production  -> .env.prod, .env.production, .env
-NODE_ENV=test        -> .env.test.local, .env.test, .env
-default/development  -> .env.local, .env.development.local, .env.development, .env
+NestJS GraphQL backend using TypeORM and MySQL. The project includes a multi-stage Dockerfile and an optional Terraform template for a disposable EC2 deployment in **`us-east-1`**.
 
+## Run locally with Node.js
 
+1. Install Node.js 22 and run `npm ci`.
+2. Copy `.env.example` to a local environment file and configure database settings.
+3. Run `npm run build`, then `npm run start:prod`.
+4. Check `GET /health` and the GraphQL endpoint.
 
-For local testing on Windows PowerShell:
-Set NODE_ENV=production. 
-or
-$env:NODE_ENV="production"
-npm run start:prod
+## Docker Compose with external MySQL
 
+`docker-compose.yml` runs the API container only; MySQL remains on the external service. Setting `MYSQL_SSL_CA_PATH` enables TLS using the specified CA and rejects untrusted certificates. Never disable certificate verification for production connections.
 
+For Aiven MySQL:
 
-For Docker on EC2, pass production env vars into the container:
-docker run -d \
-  --name nest-graphql-mysql \
-  -p 8085:8085 \
-  --env-file .env.prod \
-  nest-graphql-mysql
-Or explicitly:
-docker run -d \
-  --name nest-graphql-mysql \
-  -p 8085:8085 \
-  -e NODE_ENV=production \
-  -e PORT=8085 \
-  -e MYSQL_DB_HOST=your-db-host \
-  -e MYSQL_DB_PORT=3306 \
-  -e MYSQL_DB_USER=your-user \
-  -e MYSQL_DB_PASSWORD=your-password \
-  -e MYSQL_DB_NAME=graphql_demo \
-  nest-graphql-mysql
+1. Download the Aiven CA certificate from the service connection page and save as `certs/mysql-ca.pem`.
+2. Create `secrets/mysql_db_password` containing only the database password. Do not commit either file. Make the secret readable by container UID `10001`.
+3. Create `.env.prod` with `NODE_ENV=production`, `PORT=8085`, and the MySQL host, port, username and database name. Do not put the password in this file.
+4. Run `docker compose up --build -d`; verify `docker compose ps` and test the health endpoint.
 
+Compose publishes port 8085 on all host interfaces by default. On EC2, the security group restricts access to your configured CIDR. Do not open MySQL port 3306 on the EC2 security group.
 
-  -------Seed data---------------
-  It uses your same env convention: local reads .env.local, production reads .env.prod
-To add seed data into the database - scripts/bulk-insert-from-excel.js
-  npm run seed:excel
+## Disposable EC2 + Terraform template
 
-  npm run seed:excel -- --file ./test-data/graphql-seed.xlsx
+The `infra/` directory provisions a VPC, public subnet, routing, Internet Gateway, security group, SSM instance role, Elastic IP and an EC2 `t3.small` with an encrypted 8 GiB gp3 root volume. Administration uses Systems Manager Session Manager; this template doesn't open SSH or use the Jenkinsfile's hard-coded host or disabled host-key checking.
 
->> To clear existing users/posts first:
-npm run seed:excel -- --file ./test-data/graphql-seed.xlsx --truncate
+The deployment builds the image on EC2 from a selected repository ref. The external Aiven database is not provisioned or changed by Terraform. The password and CA PEM are retrieved from pre-created SSM parameters; their values are not placed in Terraform variables/state.
 
+Follow [`infra/README.md`](infra/README.md) for prerequisites, parameter setup, Aiven allowlisting, deployment, testing, cost and teardown.
 
+## Existing behaviour retained
+
+TypeORM's `synchronize: true` is unchanged as requested. Review it before production. The existing Jenkinsfile is also unchanged; this Terraform flow does not use it.
+
+## Seed data
+
+The Excel seeding script is available as `npm run seed:excel`. Review `scripts/bulk-insert-from-excel.js` before running it against any non-test database.
+
+## Security reminders
+
+- Never commit `.env.prod`, database passwords, CA material or Terraform state.
+- Keep TLS certificate verification enabled.
+- Restrict port 8085 to a trusted client CIDR while testing.
+- The `/health` endpoint currently checks process health only, not database readiness.
