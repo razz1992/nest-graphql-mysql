@@ -67,4 +67,19 @@ query Posts {
 }
 ```
 
-Single-record queries (`user(id: ...)` and `post(id: ...)`) are not paginated because they return one record. Pagination currently applies to the top-level list queries; nested `User.posts` relationships retain their existing DataLoader behavior.
+Single-record queries (`user(id: ...)` and `post(id: ...)`) are not paginated because they return one record. The nested `User.posts` list also accepts pagination arguments and continues to batch sibling user pages with DataLoader.
+
+```graphql
+query UsersWithPostPages {
+  users(limit: 10, offset: 0) {
+    id
+    name
+    posts(limit: 5, offset: 10) {
+      id
+      title
+    }
+  }
+}
+```
+
+The `User.posts` loader applies each user's limit/offset in the database and batches pages for sibling users. All list pages use ascending IDs for deterministic ordering.
