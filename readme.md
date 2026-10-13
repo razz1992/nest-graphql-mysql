@@ -44,3 +44,27 @@ The Excel seeding script is available as `npm run seed:excel`. Review `scripts/b
 - Keep TLS certificate verification enabled.
 - Restrict port 8085 to a trusted client CIDR while testing.
 - The `/health` endpoint currently checks process health only, not database readiness.
+
+
+## GraphQL list pagination
+
+The top-level `users` and `posts` list queries accept `limit` and `offset` arguments. Both default to `limit: 10` and `offset: 0`; limits must be from 1 through 100, and offsets must be non-negative integers. Results are ordered by ascending ID so offset pages have a deterministic order.
+
+```graphql
+query Users {
+  users(limit: 10, offset: 20) {
+    id
+    name
+    email
+  }
+}
+
+query Posts {
+  posts(limit: 10, offset: 20) {
+    id
+    title
+  }
+}
+```
+
+Single-record queries (`user(id: ...)` and `post(id: ...)`) are not paginated because they return one record. Pagination currently applies to the top-level list queries; nested `User.posts` relationships retain their existing DataLoader behavior.
