@@ -8,15 +8,12 @@ APP_DIR='${app_directory}'
 REPOSITORY_URL='${repository_url}'
 REPOSITORY_REF='${repository_ref}'
 COMPOSE_VERSION='${docker_compose_version}'
+BUILDX_VERSION='v0.37.2'
+BUILDX_SHA256='982ca20490b45ed1ec8d99795974d3d874a358f75938c9c237305010e6b7e548'
 PASSWORD_PARAMETER='${mysql_password_parameter_name}'
 CA_PARAMETER='${mysql_ca_parameter_name}'
 
 log() { printf '[bootstrap] %s\n' "$1"; }
-log "Installing Docker, Git, curl and AWS CLI in ${aws_region}."
-dnf update -y
-dnf install -y docker git curl awscli-2
-systemctl enable --now docker
-
 NETWORK_READY=0
 for attempt in $(seq 1 40); do
   if timeout 4 bash -c '</dev/tcp/amazonlinux.com/443' 2>/dev/null; then
@@ -30,6 +27,11 @@ if [ "$NETWORK_READY" -ne 1 ]; then
   exit 1
 fi
 
+log "Installing Docker, Git and AWS CLI in ${aws_region}; reusing the curl command provided by curl-minimal."
+dnf update -y
+dnf install -y docker git awscli-2
+systemctl enable --now docker
+
 install -d -m 0755 /usr/local/lib/docker/cli-plugins
 cd /tmp
 curl --fail --silent --show-error --location \
@@ -40,6 +42,13 @@ curl --fail --silent --show-error --location \
   --output docker-compose-linux-x86_64.sha256
 sha256sum --check docker-compose-linux-x86_64.sha256
 install -o root -g root -m 0755 docker-compose-linux-x86_64 /usr/local/lib/docker/cli-plugins/docker-compose
+BUILDX_FILE="buildx-$BUILDX_VERSION.linux-amd64"
+curl --fail --silent --show-error --location \
+  "https://github.com/docker/buildx/releases/download/$BUILDX_VERSION/$BUILDX_FILE" \
+  --output "$BUILDX_FILE"
+echo "$BUILDX_SHA256  $BUILDX_FILE" | sha256sum --check -
+install -o root -g root -m 0755 "$BUILDX_FILE" /usr/local/lib/docker/cli-plugins/docker-buildx
+/usr/bin/docker buildx version
 /usr/bin/docker compose version
 
 if [ -d "$APP_DIR/.git" ]; then
