@@ -114,7 +114,7 @@ variable "mysql_db_user" {
 variable "mysql_db_name" {
   description = "External MySQL database name."
   type        = string
-  default     = "defaultdb"
+  default     = "graphql_demo"
 }
 
 variable "ssm_parameter_prefix" {
