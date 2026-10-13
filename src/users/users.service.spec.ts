@@ -1,3 +1,18 @@
+jest.mock('@nestjs/common', () => ({
+  BadRequestException: class BadRequestException extends Error {},
+  NotFoundException: class NotFoundException extends Error {},
+  Injectable: () => (target: Function) => target,
+}));
+jest.mock('@nestjs/typeorm', () => ({
+  InjectRepository: () => () => undefined,
+}));
+jest.mock('../posts/entities/post.entity', () => ({
+  Post: class Post {},
+}));
+jest.mock('./user.entity', () => ({
+  User: class User {},
+}));
+
 import { BadRequestException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 
