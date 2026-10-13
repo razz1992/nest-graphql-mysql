@@ -1,3 +1,7 @@
+jest.mock('@nestjs/common', () => ({
+  BadRequestException: class BadRequestException extends Error {},
+}));
+
 import { BadRequestException } from '@nestjs/common';
 import {
   DEFAULT_PAGE_LIMIT,
