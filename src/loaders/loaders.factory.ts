@@ -36,7 +36,7 @@ export class LoadersFactory {
    * limited in the database, while DataLoader still batches sibling fields.
    */
   createUserPostsLoader() {
-    return new DataLoader<UserPostsPageKey, Post[]>(
+    return new DataLoader<UserPostsPageKey, Post[], string>(
       async (keys) => {
         const pageResults: Post[][] = keys.map(() => []);
         if (keys.length === 0) {
