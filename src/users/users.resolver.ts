@@ -15,6 +15,7 @@ import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
+import type { UserPostsPageKey } from '../loaders/loaders.factory';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -65,11 +66,19 @@ export class UsersResolver {
   @ResolveField(() => [Post])
   posts(
     @Parent() user: User,
+    @Args('limit', { type: () => Int, defaultValue: 10 })
+    limit: number,
+    @Args('offset', { type: () => Int, defaultValue: 0 })
+    offset: number,
     @Context()
     context: {
-      userPostsLoader: DataLoader<number, Post[]>;
+      userPostsLoader: DataLoader<UserPostsPageKey, Post[]>;
     },
   ) {
-    return context.userPostsLoader.load(user.id);
+    return context.userPostsLoader.load({
+      userId: user.id,
+      limit,
+      offset,
+    });
   }
 }
