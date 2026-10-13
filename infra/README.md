@@ -41,7 +41,7 @@ cp terraform.tfvars.example terraform.tfvars
 
 Replace the example `allowed_cidr` with your current public IP followed by `/32`. The default example uses a documentation-only IP and intentionally will not allow a real client. Do not commit `terraform.tfvars`.
 
-Defaults include the requested instance type and disk, the external MySQL hostname/port/database/user, and `us-east-1`. Pin `repository_ref` to a full commit SHA for repeatable deployments.
+Defaults include the requested instance type and disk, the external MySQL hostname/port/user, database name `graphql_demo`, and `us-east-1`. The Aiven database must already exist; Terraform does not rename databases, create `graphql_demo`, or migrate records from `defaultdb`. Keep the `mysql_db_name` value in your local, ignored `terraform.tfvars` aligned with the intended database. Pin `repository_ref` to a full commit SHA for repeatable deployments.
 
 ## 3. Plan and deploy
 
